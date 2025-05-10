@@ -1,0 +1,15 @@
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = true
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = true
+fail-under = 65
+exclude = ["setup.py", "docs", "build"]
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*", ".*Meta", ".*Migration.*", ".*Config*."]
+verbose = 2
+quiet = false
+whitelist-regex = []
+color = true

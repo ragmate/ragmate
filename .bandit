@@ -1,0 +1,6 @@
+# .bandit
+
+
+[bandit]
+exclude = tests
+skips = B608

@@ -1,0 +1,14 @@
+pip==25.1.1
+langchain[openai]==0.3.25
+langchain-openai==0.3.16
+langchain-core==0.3.59
+langchain-text-splitters==0.3.8
+langgraph==0.4.3
+pathspec==0.12.1
+fastapi==0.115.12
+pydantic==2.11.4
+pydantic-settings==2.9.1
+uvicorn==0.34.2
+gunicorn==23.0.0
+watchdog==6.0.0
+numpy==2.2.5
