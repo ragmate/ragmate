@@ -1,5 +1,6 @@
 .venv
 .env
+.ragmate.env
 .idea
 .mypy_cache
 .ruff_cache
