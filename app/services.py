@@ -170,7 +170,7 @@ class VectorStoreService:
 
     @staticmethod
     def get_embedding() -> OpenAIEmbeddings:
-        return OpenAIEmbeddings(model=get_settings().OPENAI_EMBEDDING_MODEL, api_key=get_settings().OPENAI_API_KEY)
+        return OpenAIEmbeddings(model=get_settings().LLM_EMBEDDING_MODEL, api_key=get_settings().LLM_API_KEY)
 
     def init_vector_store(self) -> None:
         embedding = self.get_embedding()

@@ -55,7 +55,7 @@ async def chat(body: ChatRequestModel, request: Request, settings: Annotated[Set
                 content = resp
 
             data = {
-                "model": settings.OPENAI_MODEL,
+                "model": settings.LOCAL_MODEL,
                 "message": {
                     "role": "assistant",
                     "content": content,
@@ -65,7 +65,7 @@ async def chat(body: ChatRequestModel, request: Request, settings: Annotated[Set
             yield (json.dumps(data) + "\n").encode()
 
         final = {
-            "model": settings.OPENAI_MODEL,
+            "model": settings.LOCAL_MODEL,
             "message": {"role": "assistant", "content": ""},
             "done_reason": "stop",
             "done": True,

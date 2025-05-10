@@ -53,11 +53,11 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 
 #### Required variables:
 
-| Variable               | Description                                                        |
-|------------------------|--------------------------------------------------------------------|
-| `OPENAI_MODEL`         | OpenAI model for generation (e.g., `o3-mini`)                      |
-| `OPENAI_EMBEDDING_MODEL`| OpenAI embedding model (e.g., `text-embedding-3-large`)            |
-| `OPENAI_API_KEY`       | Your OpenAI API key                                               |
+| Variable               | Description                                             |
+|------------------------|---------------------------------------------------------|
+| `LLM_MODEL`         | OpenAI LLM model for generation (e.g., `o3-mini`)       |
+| `LLM_EMBEDDING_MODEL`| OpenAI embedding model (e.g., `text-embedding-3-large`) |
+| `LLM_API_KEY`       | Your OpenAI API key                                     |
 
 #### Optional variables:
 
@@ -73,9 +73,9 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 > Example of `.ragmate.env`:
 
 ```env
-OPENAI_MODEL=o3-mini
-OPENAI_EMBEDDING_MODEL=text-embedding-3-large
-OPENAI_API_KEY=sk-...
+LLM_MODEL=o3-mini
+LLM_EMBEDDING_MODEL=text-embedding-3-large
+LLM_API_KEY=sk-...
 REINDEX_AFTER_N_CHANGES=100
 FRAMEWORK=django
 TEXT_FILE_EXTENSIONS=.py,.html,.css
@@ -103,7 +103,7 @@ docker compose up -d
 ## Demo
 
 <p align="center">
-  <img src="https://media.githubusercontent.com/media/ragmate/ragmate/main/assets/docs/demo.gif" width="100%" />
+  <img src="https://raw.githubusercontent.com/ragmate/ragmate/main/assets/docs/demo.gif" width="100%" />
 </p>
 
 ---
