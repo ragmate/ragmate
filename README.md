@@ -61,13 +61,13 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 
 #### Optional variables:
 
-| Variable                | Description                                                                                         | Default value |
-|-------------------------|-----------------------------------------------------------------------------------------------------|---------------|
-| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                   | `100`         |
-| `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.)     | — (not set)   |
-| `TEXT_FILE_EXTENSIONS`  | File extensions to index (comma-separated without spaces)                                          | `.py,.js,.ts,.php,.java,.rb,.go,.cs,.rs,.html,.css` |
+| Variable                | Description                                                                                     | Default value                                         |
+|-------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `100`                                                 |
+| `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.) | — (not set)                                           |
+| `TEXT_FILE_EXTENSIONS`  | File extensions to index (square brackets, comma-separated, without spaces, and in quotes)                           | `[".py",".js",".ts",".php",".java",".rb",".go",".cs",".rs",".html",".css"]` |
 
-> 🧾 **File Ignoring**:  
+> 🧾 **File Ignoring**:
 > Ragmate automatically excludes files and folders specified in `.gitignore` and `.aiignore` located in the project root.
 
 > Example of `.ragmate.env`:

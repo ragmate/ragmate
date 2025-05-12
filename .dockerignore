@@ -72,6 +72,7 @@ target/
 
 # Virtual environment
 .env
+.ragmate.env
 .venv/
 venv/
 
@@ -90,3 +91,4 @@ venv/
 
 docker_data
 cache
+assets
