@@ -1,6 +1,6 @@
 # Ragmate
 
-**Local RAG server for code editors (JetBrains supported).**  
+**Local RAG server for code editors (JetBrains supported).**
 Scans your codebase, builds a local context index, and connects to any external LLM for context-aware code generation.
 
 ---
@@ -33,7 +33,6 @@ In your project root, create or edit `compose.yml`:
 services:
   ragmate:
     image: ghcr.io/ragmate/ragmate:latest
-    command: /bin/sh -c "gunicorn --workers 1 --max-requests 500 --bind 0.0.0.0:11434 -k uvicorn.workers.UvicornWorker app.main:app"
     ports:
       - "11434:11434"
     env_file:
