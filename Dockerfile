@@ -15,3 +15,6 @@ RUN pip install --no-cache-dir -r requirements/base.txt
 
 COPY . /apps
 WORKDIR /apps
+
+EXPOSE 11434
+CMD ["gunicorn", "--workers", "1", "--max-requests", "500", "--bind", "0.0.0.0:11434", "-k", "uvicorn.workers.UvicornWorker", "app.main:app"]

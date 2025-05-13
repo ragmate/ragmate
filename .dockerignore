@@ -92,3 +92,5 @@ venv/
 docker_data
 cache
 assets
+.mypy_cache
+.ruff_cache
