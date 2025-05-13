@@ -77,7 +77,7 @@ LLM_EMBEDDING_MODEL=text-embedding-3-large
 LLM_API_KEY=sk-...
 REINDEX_AFTER_N_CHANGES=100
 FRAMEWORK=django
-TEXT_FILE_EXTENSIONS=.py,.html,.css
+TEXT_FILE_EXTENSIONS=[".py",".html",".css"]
 ```
 
 ---
