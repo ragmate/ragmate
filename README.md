@@ -65,9 +65,9 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 | `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `100`                                                                       |
 | `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.) | — (not set)                                                                 |
 | `TEXT_FILE_EXTENSIONS`  | File extensions to index (square brackets, comma-separated, without spaces, and in quotes)      | `[".py",".js",".ts",".php",".java",".rb",".go",".cs",".rs",".html",".css"]` |
-| `LLM_EMBEDDING_MODEL`  | Embedding model (e.g., `openai`, `gpt4all`)                                                     | `all‑MiniLM‑L6‑v2.gguf2.f16.gguf`                                           |
+| `LLM_EMBEDDING_MODEL`  | Embedding model (e.g., `text-embedding-3-large`, etc.)                                          | `all‑MiniLM‑L6‑v2.gguf2.f16.gguf`                                           |
 | `EMBEDDING_API_KEY`  | Embedding model API key                                                                         | - (not set)                                                                 |
-| `EMBEDDING_PROVIDER`  | Embedding provider (e.g., `openai`, `anthropic`, `deepseek`, etc.)                              | `gpt4all` |
+| `EMBEDDING_PROVIDER`  | Embedding provider (e.g., `openai`, `gpt4all`)                              | `gpt4all` |
 
 > 🧾 **File Ignoring**:
 > Ragmate automatically excludes files and folders specified in `.gitignore` and `.aiignore` located in the project root.
@@ -95,7 +95,7 @@ TEXT_FILE_EXTENSIONS=[".py",".html",".css"]
 
 #### Embedding models
 
-| `LLM_PROVIDER`               | Models                                                             |
+| `EMBEDDING_PROVIDER`               | Models                                                             |
 |------------------------|--------------------------------------------------------------------|
 | `openai`         | [OpenAI docs](https://platform.openai.com/docs/models)             |
 | `gpt4all`| [GPT4All docs](https://docs.gpt4all.io/old/gpt4all_python_embedding.html#supported-embedding-models) |
