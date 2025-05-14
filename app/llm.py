@@ -80,7 +80,9 @@ class LLM:
         return converted
 
     async def _llm_node_func(self, state: State) -> dict[str, Any]:
-        llm = init_chat_model(get_settings().LLM_MODEL, model_provider="openai", api_key=get_settings().LLM_API_KEY)
+        llm = init_chat_model(
+            get_settings().LLM_MODEL, model_provider=get_settings().LLM_PROVIDER, api_key=get_settings().LLM_API_KEY
+        )
         converted_prompt = await self.to_langchain_messages(messages=state["prompt"])
         return {"answer": await llm.ainvoke(converted_prompt)}
 

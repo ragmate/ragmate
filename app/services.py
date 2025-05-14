@@ -8,7 +8,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pathspec
+from langchain_community.embeddings import GPT4AllEmbeddings
 from langchain_core.documents import Document
+from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -185,8 +187,23 @@ class VectorStoreService:
     _directory_inspector_service = DirectoryInspectorService()
 
     @staticmethod
-    def get_embedding() -> OpenAIEmbeddings:
-        return OpenAIEmbeddings(model=get_settings().LLM_EMBEDDING_MODEL, api_key=get_settings().LLM_API_KEY)
+    def get_embedding() -> Embeddings:
+        api_key = get_settings().EMBEDDING_API_KEY or get_settings().LLM_API_KEY
+
+        embeddings: Embeddings
+        match get_settings().EMBEDDING_PROVIDER:
+            case "openai":
+                embeddings = OpenAIEmbeddings(model=get_settings().LLM_EMBEDDING_MODEL, api_key=api_key)
+            case "gpt4all":
+                Path(get_settings().GPT4ALL_MODEL_PATH).mkdir(parents=True, exist_ok=True)
+                embeddings = GPT4AllEmbeddings(  # type: ignore[call-arg]
+                    model_name=get_settings().LLM_EMBEDDING_MODEL,
+                    gpt4all_kwargs={"model_path": get_settings().GPT4ALL_MODEL_PATH},
+                )
+            case _:
+                raise Exception(f"Unknown embedding provider: {get_settings().EMBEDDING_PROVIDER}")
+
+        return embeddings
 
     def init_vector_store(self) -> None:
         embedding = self.get_embedding()
