@@ -52,19 +52,22 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 
 #### Required variables:
 
-| Variable               | Description                                             |
-|------------------------|---------------------------------------------------------|
-| `LLM_MODEL`         | OpenAI LLM model for generation (e.g., `o3-mini`)       |
-| `LLM_EMBEDDING_MODEL`| OpenAI embedding model (e.g., `text-embedding-3-large`) |
-| `LLM_API_KEY`       | Your OpenAI API key                                     |
+| Variable               | Description                                |
+|------------------------|--------------------------------------------|
+| `LLM_MODEL`         | LLM model for generation (e.g., `o3-mini`) |
+| `LLM_PROVIDER`| Embedding model (e.g., `openai`)           |
+| `LLM_API_KEY`       | Your LLM API key                           |
 
 #### Optional variables:
 
-| Variable                | Description                                                                                     | Default value                                         |
-|-------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `100`                                                 |
-| `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.) | — (not set)                                           |
-| `TEXT_FILE_EXTENSIONS`  | File extensions to index (square brackets, comma-separated, without spaces, and in quotes)                           | `[".py",".js",".ts",".php",".java",".rb",".go",".cs",".rs",".html",".css"]` |
+| Variable                | Description                                                                                     | Default value                                                               |
+|-------------------------|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `100`                                                                       |
+| `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.) | — (not set)                                                                 |
+| `TEXT_FILE_EXTENSIONS`  | File extensions to index (square brackets, comma-separated, without spaces, and in quotes)      | `[".py",".js",".ts",".php",".java",".rb",".go",".cs",".rs",".html",".css"]` |
+| `LLM_EMBEDDING_MODEL`  | Embedding model (e.g., `openai`, `gpt4all`)                                                     | `all‑MiniLM‑L6‑v2.gguf2.f16.gguf`                                           |
+| `EMBEDDING_API_KEY`  | Embedding model API key                                                                         | - (not set)                                                                 |
+| `EMBEDDING_PROVIDER`  | Embedding provider (e.g., `openai`, `anthropic`, `deepseek`, etc.)                              | `gpt4all` |
 
 > 🧾 **File Ignoring**:
 > Ragmate automatically excludes files and folders specified in `.gitignore` and `.aiignore` located in the project root.
@@ -72,13 +75,32 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 > Example of `.ragmate.env`:
 
 ```env
+LLM_PROVIDER=openai
 LLM_MODEL=o3-mini
-LLM_EMBEDDING_MODEL=text-embedding-3-large
 LLM_API_KEY=sk-...
-REINDEX_AFTER_N_CHANGES=100
 FRAMEWORK=django
 TEXT_FILE_EXTENSIONS=[".py",".html",".css"]
 ```
+
+#### LLM providers and their models
+
+| `LLM_PROVIDER`               | Models                                                               |
+|------------------------|----------------------------------------------------------------------|
+| `openai`         | [OpenAI docs](https://platform.openai.com/docs/models)               |
+| `anthropic`| [Anthropic docs](https://docs.anthropic.com/en/docs/models-overview) |
+| `google-genai`       | [Gemini API docs](https://ai.google.dev/gemini-api/docs/models)      |
+| `mistralai`       | [Mistral AI docs](https://docs.mistral.ai/getting-started/models/)   |
+| `xai`       | [xAI docs](https://docs.x.ai/docs/models#models-and-pricing)         |
+| `deepseek`       | [DeepSeek docs](https://api-docs.deepseek.com/quick_start/pricing)   |
+
+#### Embedding models
+
+| `LLM_PROVIDER`               | Models                                                             |
+|------------------------|--------------------------------------------------------------------|
+| `openai`         | [OpenAI docs](https://platform.openai.com/docs/models)             |
+| `gpt4all`| [GPT4All docs](https://docs.gpt4all.io/old/gpt4all_python_embedding.html#supported-embedding-models) |
+
+_Note: `gpt4all` runs the embedding model locally and it does not require `LLM_EMBEDDING_MODEL`_
 
 ---
 
@@ -104,19 +126,6 @@ docker compose up -d
 <p align="center">
   <img src="https://raw.githubusercontent.com/ragmate/ragmate/main/assets/docs/demo.gif" width="100%" />
 </p>
-
----
-
-## 📝 Future Plans
-
-VS Code Editor Support: We plan to integrate Ragmate with Visual Studio Code to support this popular IDE.
-
-New LLM Integrations: Support for additional language models is coming soon, including:
-
-* Gemini
-* Claude
-* Mistral
-* DeepSeek
 
 ---
 
