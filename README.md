@@ -137,4 +137,4 @@ Licensed under the [Apache 2.0 License](LICENSE).
 
 ## 🤝 Contributing
 
-Issues and PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details (coming soon).
+Issues and PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
