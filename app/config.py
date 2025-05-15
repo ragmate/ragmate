@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     LLM_API_KEY: str
     LLM_PROVIDER: Literal["openai", "anthropic", "google-genai", "mistralai", "xai", "deepseek"]
 
-    LLM_EMBEDDING_MODEL: str = "all‑MiniLM‑L6‑v2.gguf2.f16.gguf"
+    LLM_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2.gguf2.f16.gguf"
     EMBEDDING_API_KEY: str | None = None
     EMBEDDING_PROVIDER: Literal["openai", "gpt4all"] = "gpt4all"
 
