@@ -5,6 +5,34 @@ Scans your codebase, builds a local context index, and connects to any external 
 
 ---
 
+## Demo
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ragmate/ragmate/main/assets/docs/product-demo.gif" width="100%" />
+</p>
+
+The demo shows how Ragmate extends JetBrains AI Assistant with a RAG context.
+
+The prompt that was used for that:
+```
+What patterns does this project use for the files scan?
+```
+
+The comparison between the default JetBrains AI Assistant with the GPT 4.1 mini LLM model and Ragmate with GPT 4.1 mini and local RAG.
+
+Ragmate environment variables that were used in this demo:
+```bash
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4.1-mini
+LLM_API_KEY=sk-...
+TEXT_FILE_EXTENSIONS=[".py"]
+FRAMEWORK=fastapi
+EMBEDDING_PROVIDER=gpt4all
+LLM_EMBEDDING_MODEL=nomic-embed-text-v1.5.f16.gguf
+```
+
+---
+
 ## ✨ Features
 
 - 🧠 Context-aware completions using your project’s actual codebase.
@@ -121,10 +149,10 @@ docker compose up -d
 
 ---
 
-## Demo
+## Demo Setup
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ragmate/ragmate/main/assets/docs/demo.gif" width="100%" />
+  <img src="https://raw.githubusercontent.com/ragmate/ragmate/main/assets/docs/demo-setup.gif" width="100%" />
 </p>
 
 ---
