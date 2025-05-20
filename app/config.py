@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     LLM_MODEL: str
     LLM_API_KEY: str
     LLM_PROVIDER: Literal["openai", "anthropic", "google-genai", "mistralai", "xai", "deepseek"]
+    LLM_BASE_URL: str | None = None
+    LLM_TEMPERATURE: float = 0.7
 
     LLM_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2.gguf2.f16.gguf"
     EMBEDDING_API_KEY: str | None = None
