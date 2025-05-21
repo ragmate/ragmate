@@ -10,4 +10,4 @@ isort==6.0.1
 bandit==1.8.3
 interrogate==1.7.0
 dodgy==0.2.1
-ruff==0.11.9
+ruff==0.11.10

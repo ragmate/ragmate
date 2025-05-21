@@ -1,24 +1,24 @@
-import json
+import hashlib
 import logging
 import os
 import sys
 import time
-import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pathspec
+from chromadb import PersistentClient
+from chromadb.errors import NotFoundError
+from langchain_chroma import Chroma
 from langchain_community.embeddings import GPT4AllEmbeddings
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 from .config import get_settings
-from .types import VectorStoreFile
 
 if TYPE_CHECKING:
     from langchain_core.vectorstores import VectorStoreRetriever
@@ -29,6 +29,10 @@ handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter(fmt="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
+
+def get_path_hash(filepath: str) -> str:
+    return hashlib.sha256(filepath.encode()).hexdigest()
 
 
 class DirectoryInspectorService:
@@ -101,93 +105,13 @@ class DirectoryInspectorService:
         return result_files
 
 
-class WatchedFilesStoreService:
-
-    def __init__(self) -> None:
-        path = get_settings().WATCHED_FILES_STORE_PATH
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        self.files_store = path
-
-    def _read_file_list(self) -> list[dict[str, str]]:
-        if not os.path.exists(self.files_store):
-            return []
-        with open(self.files_store, "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    def _write_file_list(self, file_list: list[dict[str, str]]) -> None:
-        with open(self.files_store, "w", encoding="utf-8") as f:
-            json.dump(file_list, f, indent=2)
-
-    def save_file_list(self, vector_store_files: list[VectorStoreFile]) -> None:
-        self._write_file_list(file_list=[x.model_dump() for x in vector_store_files])
-
-    def load_file_list(self) -> list[VectorStoreFile]:
-        if not os.path.exists(self.files_store):
-            return []
-
-        data = self._read_file_list()
-        return [VectorStoreFile(**item) for item in data]
-
-    def add_files_to_list(self, vector_store_files: list[VectorStoreFile]) -> None:
-        file_list = []
-        changed = False
-        vector_store_files_as_dict = [x.model_dump() for x in vector_store_files]
-
-        if os.path.exists(self.files_store):
-            file_list = self._read_file_list()
-
-        for vector_store_file_as_dict in vector_store_files_as_dict:
-            if vector_store_file_as_dict not in file_list:
-                file_list.append(vector_store_file_as_dict)
-                changed = True
-
-        if changed:
-            self._write_file_list(file_list=file_list)
-
-    def remove_file_from_list(self, vector_store_file: VectorStoreFile) -> None:
-        vector_store_file_as_dict = vector_store_file.model_dump()
-
-        if not os.path.exists(self.files_store):
-            return
-
-        file_list = self._read_file_list()
-
-        if vector_store_file_as_dict in file_list:
-            file_list.remove(vector_store_file_as_dict)
-            self._write_file_list(file_list=file_list)
-
-    def is_list_empty(self) -> bool:
-        if not os.path.exists(self.files_store):
-            return True
-        file_list = self._read_file_list()
-        return len(file_list) == 0
-
-    def get_file_id_by_path(self, file_path: str) -> str | None:
-        vector_store_files = self.load_file_list()
-        match = next((f for f in vector_store_files if f.file_path == file_path), None)
-        return match.file_id if match else None
-
-    @staticmethod
-    def update_file_id_by_path(
-        vector_store_files: list[VectorStoreFile],
-        updated_vector_store_files: list[VectorStoreFile],
-    ) -> list[VectorStoreFile]:
-        file_id_map = {f.file_path: f.file_id for f in updated_vector_store_files}
-
-        for file in vector_store_files:
-            if file.file_path in file_id_map:
-                file.file_id = file_id_map[file.file_path]
-
-        return vector_store_files
-
-
 class VectorStoreService:
-    vector_store: InMemoryVectorStore | None = None
+    vector_store: Chroma | None = None
 
     _directory_inspector_service = DirectoryInspectorService()
 
     @staticmethod
-    def get_embedding() -> Embeddings:
+    def _get_embeddings() -> Embeddings:
         api_key = get_settings().EMBEDDING_API_KEY or get_settings().LLM_API_KEY
 
         embeddings: Embeddings
@@ -205,44 +129,25 @@ class VectorStoreService:
 
         return embeddings
 
-    def init_vector_store(self) -> None:
-        embedding = self.get_embedding()
-        self.vector_store = InMemoryVectorStore(embedding=embedding)
+    def init(self) -> bool:
+        persistent_client = PersistentClient(path=get_settings().CHROMA_PERSIST_PATH)
+        collection_name = "collection"
+        is_created = False
 
-    def load_from_storage(self) -> None:
-        logger.info("Loading vector store from storage...")
+        try:
+            persistent_client.get_collection(collection_name)
+        except NotFoundError:
+            persistent_client.create_collection(collection_name)
+            is_created = True
 
-        self.init_vector_store()
-        embedding = self.get_embedding()
+        embeddings = self._get_embeddings()
 
-        if self.vector_store is None:
-            raise Exception("Vector store is not initialized.")
-
-        self.vector_store.load(path=get_settings().VECTOR_STORE_DUMP_PATH, embedding=embedding)
-
-    def dump_to_storage(self) -> None:
-        logger.info("Saving vector store to storage...")
-
-        if self.vector_store is None:
-            raise Exception("Vector store is not initialized.")
-
-        self.vector_store.dump(path=get_settings().VECTOR_STORE_DUMP_PATH)
-
-    def load_storage(self) -> None:
-        logger.info("Loading vector store...")
-
-        self.init_vector_store()
-        self.load_from_storage()
-
-        logger.info("Vector store loaded.")
-
-    def load_storage_and_index(self, project_path: str) -> list[VectorStoreFile]:
-        logger.info("Loading and indexing files...")
-
-        self.init_vector_store()
-        files = self._directory_inspector_service.list_files(project_path=project_path)
-
-        return self.add_documents(files_list=files)
+        self.vector_store = Chroma(
+            client=persistent_client,
+            collection_name=collection_name,
+            embedding_function=embeddings,
+        )
+        return is_created
 
     def get_retriever(self) -> "VectorStoreRetriever":
         logger.info("Getting retriever...")
@@ -251,29 +156,28 @@ class VectorStoreService:
             raise Exception("Vector store is not initialized.")
         return self.vector_store.as_retriever()
 
-    def add_documents(self, files_list: list[str]) -> list[VectorStoreFile]:
+    def add_documents(self, files_list: list[str]) -> None:
         logger.info("Adding documents...")
 
         if self.vector_store is None:
             raise Exception("Vector store is not initialized.")
 
         docs = []
-        file_to_doc_id = []
 
         for f in files_list:
             with open(f, "r", encoding="utf-8") as file:
-                doc_id = str(uuid.uuid4())
-                docs.append(Document(page_content=file.read(), metadata={"source": f, "doc_id": doc_id}))
-                file_to_doc_id.append(VectorStoreFile(file_id=doc_id, file_path=f))
+                page_content = file.read()
+                if not page_content:
+                    return None
+
+                doc_id = get_path_hash(filepath=f)
+                docs.append(Document(page_content=page_content, metadata={"source": f, "doc_id": doc_id}))
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         all_splits = text_splitter.split_documents(docs)
 
         self.vector_store.add_documents(documents=all_splits)
-        self.dump_to_storage()
-
         logger.info("Documents added.")
-        return file_to_doc_id
 
     def remove_documents(self, ids: list[str]) -> None:
         logger.info("Removing documents...")
@@ -281,14 +185,16 @@ class VectorStoreService:
         if self.vector_store is None:
             raise Exception("Vector store is not initialized.")
 
-        self.vector_store.delete(ids=ids)
-        self.dump_to_storage()
+        result = self.vector_store.get(where={"doc_id": {"$in": ids}})
+        if result["ids"]:
+            self.vector_store.delete(ids=result["ids"])
+            logger.info(f"Deleted {len(result['ids'])} documents.")
+        logger.info("Documents removed.")
 
 
 class DirectoryMonitorEventHandler(PatternMatchingEventHandler):
     changed_files: list[str] = []
 
-    _watched_files_storage = WatchedFilesStoreService()
     _directory_inspector_service = DirectoryInspectorService()
 
     def __init__(self, vector_store: VectorStoreService) -> None:
@@ -313,18 +219,9 @@ class DirectoryMonitorEventHandler(PatternMatchingEventHandler):
         if self.change_counters > 0 and self.change_counters % get_settings().REINDEX_AFTER_N_CHANGES == 0:
             logger.info(f"Reindexing files: {self.changed_files}")
 
-            file_ids = []
-            for changed_file in self.changed_files:
-                file_id = self._watched_files_storage.get_file_id_by_path(file_path=changed_file)
-                if file_id is not None:
-                    file_ids.append(file_id)
+            file_ids = [get_path_hash(x) for x in self.changed_files]
             self.vector_store.remove_documents(ids=file_ids)
-
-            updated_vector_store_files = self._watched_files_storage.update_file_id_by_path(
-                vector_store_files=self._watched_files_storage.load_file_list(),
-                updated_vector_store_files=self.vector_store.add_documents(files_list=self.changed_files),
-            )
-            self._watched_files_storage.save_file_list(vector_store_files=updated_vector_store_files)
+            self.vector_store.add_documents(files_list=self.changed_files)
 
             self.changed_files = []
 
@@ -334,13 +231,9 @@ class DirectoryMonitorEventHandler(PatternMatchingEventHandler):
         event_src_path = str(event.src_path)
         logger.info(f"Deleted file: {event_src_path}")
 
-        file_id = self._watched_files_storage.get_file_id_by_path(file_path=event_src_path)
-        if file_id is None:
-            return None
-
-        vector_store_file = VectorStoreFile(file_id=file_id, file_path=event_src_path)
-        self._watched_files_storage.remove_file_from_list(vector_store_file=vector_store_file)
-        self.vector_store.remove_documents(ids=[file_id])
+        self.vector_store.remove_documents(ids=[get_path_hash(event_src_path)])
+        if event_src_path in self.changed_files:
+            self.changed_files.remove(event_src_path)
 
         return None
 
@@ -348,8 +241,9 @@ class DirectoryMonitorEventHandler(PatternMatchingEventHandler):
         event_src_path = str(event.src_path)
         logger.info(f"Created file: {event_src_path}")
 
-        vector_store_files = self.vector_store.add_documents(files_list=[event_src_path])
-        self._watched_files_storage.add_files_to_list(vector_store_files=vector_store_files)
+        self.vector_store.add_documents(files_list=[event_src_path])
+        if event_src_path not in self.changed_files:
+            self.changed_files.append(event_src_path)
 
         return None
 
@@ -358,22 +252,18 @@ class DirectoryMonitorEventHandler(PatternMatchingEventHandler):
         event_dest_path = str(event.dest_path)
         logger.info(f"Moved file: {event_src_path} to {event_dest_path}")
 
-        old_file_id = self._watched_files_storage.get_file_id_by_path(file_path=event_src_path)
-        if old_file_id is None:
-            return None
-        old_vector_store_file = VectorStoreFile(file_id=old_file_id, file_path=event_src_path)
+        self.vector_store.remove_documents(ids=[get_path_hash(event_src_path)])
+        self.vector_store.add_documents(files_list=[event_dest_path])
 
-        self._watched_files_storage.remove_file_from_list(vector_store_file=old_vector_store_file)
-        self.vector_store.remove_documents(ids=[old_file_id])
-
-        new_vector_store_files = self.vector_store.add_documents(files_list=[event_dest_path])
-        self._watched_files_storage.add_files_to_list(vector_store_files=new_vector_store_files)
+        if event_src_path in self.changed_files:
+            self.changed_files.remove(event_src_path)
+        if event_dest_path not in self.changed_files:
+            self.changed_files.append(event_dest_path)
 
         return None
 
 
 class DirectoryMonitorService:
-    _watched_files_storage = WatchedFilesStoreService()
     _directory_inspector_service = DirectoryInspectorService()
 
     def __init__(self, vector_store: VectorStoreService) -> None:
@@ -382,15 +272,12 @@ class DirectoryMonitorService:
     def watch_directory(self) -> None:
         project_path = get_settings().PROJECT_PATH
 
-        if self._watched_files_storage.is_list_empty():
-            logger.info("No watched files found. Loading and indexing files...")
+        is_created = self.vector_store.init()
 
-            vector_store_files = self.vector_store.load_storage_and_index(project_path=project_path)
-            self._watched_files_storage.save_file_list(vector_store_files=vector_store_files)
-        else:
-            logger.info("Watched files found. Getting list of files to watch from storage file...")
-
-            self.vector_store.load_storage()
+        if is_created:
+            logger.info("No indexed files found. Loading and indexing files...")
+            files = self._directory_inspector_service.list_files(project_path=project_path)
+            self.vector_store.add_documents(files_list=files)
 
         spec = self._directory_inspector_service.load_patterns(project_path=project_path)
         observer = Observer()

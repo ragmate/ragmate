@@ -18,12 +18,11 @@ class Settings(BaseSettings):
     EMBEDDING_PROVIDER: Literal["openai", "gpt4all"] = "gpt4all"
 
     CACHE_PATH: str = "cache"
-    WATCHED_FILES_STORE_PATH: str = f"{CACHE_PATH}/watched_files.json"
-    VECTOR_STORE_DUMP_PATH: str = f"{CACHE_PATH}/vector_store.json"
     GPT4ALL_MODEL_PATH: str = f"{CACHE_PATH}/gpt4all"
+    CHROMA_PERSIST_PATH: str = f"{CACHE_PATH}/chroma"
 
     LOCAL_MODEL: str = "ragmate"
-    REINDEX_AFTER_N_CHANGES: int = 100
+    REINDEX_AFTER_N_CHANGES: int = 50
     PROJECT_PATH: str = "/project"
     FRAMEWORK: str | None = None
     TEXT_FILE_EXTENSIONS: list[str] = [
