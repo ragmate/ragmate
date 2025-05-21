@@ -38,7 +38,7 @@ LLM_EMBEDDING_MODEL=nomic-embed-text-v1.5.f16.gguf
 - 🧠 Context-aware completions using your project’s actual codebase.
 - ⚙️ Integration with JetBrains IDEs via AI Assistant.
 - 🔄 Real-time file change tracking and automatic reindexing.
-- 🔌 Use any OpenAI-compatible LLM and embedding model.
+- 🔌 Use any external or local LLM and embedding model.
 - 🛡️ Fully local — your code never leaves your machine.
 
 ---
@@ -90,12 +90,14 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 
 | Variable                | Description                                                                                     | Default value                                                               |
 |-------------------------|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `100`                                                                       |
+| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `50`                                                                        |
 | `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.) | — (not set)                                                                 |
 | `TEXT_FILE_EXTENSIONS`  | File extensions to index (square brackets, comma-separated, without spaces, and in quotes)      | `[".py",".js",".ts",".php",".java",".rb",".go",".cs",".rs",".html",".css"]` |
 | `LLM_EMBEDDING_MODEL`  | Embedding model (e.g., `text-embedding-3-large`, etc.)                                          | `all‑MiniLM‑L6‑v2.gguf2.f16.gguf`                                           |
 | `EMBEDDING_API_KEY`  | Embedding model API key                                                                         | - (not set)                                                                 |
-| `EMBEDDING_PROVIDER`  | Embedding provider (e.g., `openai`, `gpt4all`)                              | `gpt4all` |
+| `EMBEDDING_PROVIDER`  | Embedding provider (e.g., `openai`, `gpt4all`)                                                  | `gpt4all`                                                                   |
+| `LLM_BASE_URL`  | Base URL for LLM API (only if using a proxy)                                                    | - (not set)                                                                 |
+| `LLM_TEMPERATURE`  | Parameter that controls the randomness of the model's output                                    | `0.7`                                                                        |
 
 > 🧾 **File Ignoring**:
 > Ragmate automatically excludes files and folders specified in `.gitignore` and `.aiignore` located in the project root.

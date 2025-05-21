@@ -8,7 +8,7 @@ We welcome contributions of all kinds — code, documentation, bug reports, idea
 ## 📌 How to Contribute
 
 ### 1. Report Issues
-If you've found a bug or have a feature request, please [open an issue](https://github.com/ragmate/ragmate/issues).  
+If you've found a bug or have a feature request, please [open an issue](https://github.com/ragmate/ragmate/issues).
 Be as descriptive as possible: what happened, what you expected, and steps to reproduce.
 
 ---
