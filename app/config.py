@@ -15,10 +15,11 @@ class Settings(BaseSettings):
 
     LLM_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2.gguf2.f16.gguf"
     EMBEDDING_API_KEY: str | None = None
-    EMBEDDING_PROVIDER: Literal["openai", "gpt4all"] = "gpt4all"
+    EMBEDDING_PROVIDER: Literal["openai", "gpt4all", "huggingface"] = "gpt4all"
 
     CACHE_PATH: str = "cache"
     GPT4ALL_MODEL_PATH: str = f"{CACHE_PATH}/gpt4all"
+    HUGGINGFACE_MODEL_PATH: str = f"{CACHE_PATH}/huggingface"
     CHROMA_PERSIST_PATH: str = f"{CACHE_PATH}/chroma"
 
     LOCAL_MODEL: str = "ragmate"

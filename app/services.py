@@ -7,12 +7,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pathspec
+import torch
 from chromadb import PersistentClient
 from chromadb.errors import NotFoundError
 from langchain_chroma import Chroma
 from langchain_community.embeddings import GPT4AllEmbeddings
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
@@ -112,20 +114,28 @@ class VectorStoreService:
 
     @staticmethod
     def _get_embeddings() -> Embeddings:
-        api_key = get_settings().EMBEDDING_API_KEY or get_settings().LLM_API_KEY
+        settings = get_settings()
+        api_key = settings.EMBEDDING_API_KEY or settings.LLM_API_KEY
 
         embeddings: Embeddings
-        match get_settings().EMBEDDING_PROVIDER:
+        match settings.EMBEDDING_PROVIDER:
             case "openai":
-                embeddings = OpenAIEmbeddings(model=get_settings().LLM_EMBEDDING_MODEL, api_key=api_key)
+                embeddings = OpenAIEmbeddings(model=settings.LLM_EMBEDDING_MODEL, api_key=api_key)
             case "gpt4all":
-                Path(get_settings().GPT4ALL_MODEL_PATH).mkdir(parents=True, exist_ok=True)
+                Path(settings.GPT4ALL_MODEL_PATH).mkdir(parents=True, exist_ok=True)
                 embeddings = GPT4AllEmbeddings(  # type: ignore[call-arg]
-                    model_name=get_settings().LLM_EMBEDDING_MODEL,
-                    gpt4all_kwargs={"model_path": get_settings().GPT4ALL_MODEL_PATH},
+                    model_name=settings.LLM_EMBEDDING_MODEL,
+                    gpt4all_kwargs={"model_path": settings.GPT4ALL_MODEL_PATH},
+                )
+            case "huggingface":
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                embeddings = HuggingFaceEmbeddings(
+                    model_name=settings.LLM_EMBEDDING_MODEL,
+                    cache_folder=settings.HUGGINGFACE_MODEL_PATH,
+                    model_kwargs={"device": device},
                 )
             case _:
-                raise Exception(f"Unknown embedding provider: {get_settings().EMBEDDING_PROVIDER}")
+                raise Exception(f"Unknown embedding provider: {settings.EMBEDDING_PROVIDER}")
 
         return embeddings
 
