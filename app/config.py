@@ -13,12 +13,11 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str | None = None
     LLM_TEMPERATURE: float = 0.7
 
-    LLM_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2.gguf2.f16.gguf"
+    LLM_EMBEDDING_MODEL: str = "microsoft/codebert-base"
     EMBEDDING_API_KEY: str | None = None
-    EMBEDDING_PROVIDER: Literal["openai", "gpt4all", "huggingface"] = "gpt4all"
+    EMBEDDING_PROVIDER: Literal["openai", "huggingface"] = "huggingface"
 
     CACHE_PATH: str = "cache"
-    GPT4ALL_MODEL_PATH: str = f"{CACHE_PATH}/gpt4all"
     HUGGINGFACE_MODEL_PATH: str = f"{CACHE_PATH}/huggingface"
     CHROMA_PERSIST_PATH: str = f"{CACHE_PATH}/chroma"
 

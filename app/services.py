@@ -11,7 +11,6 @@ import torch
 from chromadb import PersistentClient
 from chromadb.errors import NotFoundError
 from langchain_chroma import Chroma
-from langchain_community.embeddings import GPT4AllEmbeddings
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -123,12 +122,6 @@ class VectorStoreService:
         match settings.EMBEDDING_PROVIDER:
             case "openai":
                 embeddings = OpenAIEmbeddings(model=settings.LLM_EMBEDDING_MODEL, api_key=api_key)
-            case "gpt4all":
-                Path(settings.GPT4ALL_MODEL_PATH).mkdir(parents=True, exist_ok=True)
-                embeddings = GPT4AllEmbeddings(  # type: ignore[call-arg]
-                    model_name=settings.LLM_EMBEDDING_MODEL,
-                    gpt4all_kwargs={"model_path": settings.GPT4ALL_MODEL_PATH},
-                )
             case "huggingface":
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 embeddings = HuggingFaceEmbeddings(
@@ -187,7 +180,7 @@ class VectorStoreService:
                     lexer = get_lexer_for_filename(f)
                     splitter = RecursiveCharacterTextSplitter.from_language(language=lexer.name.lower())
                 except ClassNotFound:
-                    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+                    splitter = RecursiveCharacterTextSplitter()
 
                 all_splits = splitter.split_documents([doc])
                 self.vector_store.add_documents(documents=all_splits)
