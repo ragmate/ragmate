@@ -17,6 +17,8 @@ from langchain_core.embeddings import Embeddings
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pygments.lexers import get_lexer_for_filename
+from pygments.util import ClassNotFound
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
@@ -172,8 +174,6 @@ class VectorStoreService:
         if self.vector_store is None:
             raise Exception("Vector store is not initialized.")
 
-        docs = []
-
         for f in files_list:
             with open(f, "r", encoding="utf-8") as file:
                 page_content = file.read()
@@ -181,12 +181,17 @@ class VectorStoreService:
                     return None
 
                 doc_id = get_path_hash(filepath=f)
-                docs.append(Document(page_content=page_content, metadata={"source": f, "doc_id": doc_id}))
+                doc = Document(page_content=page_content, metadata={"source": f, "doc_id": doc_id})
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        all_splits = text_splitter.split_documents(docs)
+                try:
+                    lexer = get_lexer_for_filename(f)
+                    splitter = RecursiveCharacterTextSplitter.from_language(language=lexer.name.lower())
+                except ClassNotFound:
+                    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
-        self.vector_store.add_documents(documents=all_splits)
+                all_splits = splitter.split_documents([doc])
+                self.vector_store.add_documents(documents=all_splits)
+
         logger.info("Documents added.")
 
     def remove_documents(self, ids: list[str]) -> None:

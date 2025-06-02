@@ -18,3 +18,4 @@ gpt4all==2.8.2
 sentence-transformers==4.1.0
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.7.0
+Pygments==2.19.1
