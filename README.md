@@ -1,6 +1,7 @@
 # Ragmate
 
 **Local RAG server for code editors (JetBrains supported).**
+
 Scans your codebase, builds a local context index, and connects to any external LLM for context-aware code generation.
 
 ---
@@ -19,17 +20,6 @@ What patterns does this project use for the files scan?
 ```
 
 The comparison between the default JetBrains AI Assistant with the GPT 4.1 mini LLM model and Ragmate with GPT 4.1 mini and local RAG.
-
-Ragmate environment variables that were used in this demo:
-```bash
-LLM_PROVIDER=openai
-LLM_MODEL=gpt-4.1-mini
-LLM_API_KEY=sk-...
-TEXT_FILE_EXTENSIONS=[".py"]
-FRAMEWORK=fastapi
-EMBEDDING_PROVIDER=gpt4all
-LLM_EMBEDDING_MODEL=nomic-embed-text-v1.5.f16.gguf
-```
 
 ---
 
@@ -88,16 +78,16 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 
 #### Optional variables:
 
-| Variable                | Description                                                                                     | Default value                                                               |
-|-------------------------|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `50`                                                                        |
-| `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.) | — (not set)                                                                 |
-| `TEXT_FILE_EXTENSIONS`  | File extensions to index (square brackets, comma-separated, without spaces, and in quotes)      | `[".py",".js",".ts",".php",".java",".rb",".go",".cs",".rs",".html",".css"]` |
-| `LLM_EMBEDDING_MODEL`  | Embedding model (e.g., `text-embedding-3-large`, etc.)                                          | `all‑MiniLM‑L6‑v2.gguf2.f16.gguf`                                           |
-| `EMBEDDING_API_KEY`  | Embedding model API key                                                                         | - (not set)                                                                 |
-| `EMBEDDING_PROVIDER`  | Embedding provider (e.g., `openai`, `gpt4all`)                                                  | `gpt4all`                                                                   |
-| `LLM_BASE_URL`  | Base URL for LLM API (only if using a proxy)                                                    | - (not set)                                                                 |
-| `LLM_TEMPERATURE`  | Parameter that controls the randomness of the model's output                                    | `0.7`                                                                        |
+| Variable                | Description                                                                                     | Default value                                                                         |
+|-------------------------|-------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `REINDEX_AFTER_N_CHANGES`| After how many file changes to rebuild the index                                                | `50`                                                                                  |
+| `FRAMEWORK`             | Specify the framework used for more accurate answers (e.g., `django`, `spring`, `nextjs`, etc.) | — (not set)                                                                           |
+| `TEXT_FILE_EXTENSIONS`  | File extensions to index (square brackets, comma-separated, without spaces, and in quotes)      | `[".py", ".js", ".ts", ".php", ".java", ".rb", ".go", ".cs", ".rs", ".html", ".css"]` |
+| `LLM_EMBEDDING_MODEL`  | Embedding model (e.g., `text-embedding-3-large`, etc.)                                          | `microsoft/codebert-base`                                                             |
+| `EMBEDDING_API_KEY`  | Embedding model API key                                                                         | - (not set)                                                                           |
+| `EMBEDDING_PROVIDER`  | Embedding provider (e.g., `openai`, `huggingface`)                                                  | `huggingface`                                                                         |
+| `LLM_BASE_URL`  | Base URL for LLM API (only if using a proxy)                                                    | - (not set)                                                                           |
+| `LLM_TEMPERATURE`  | Parameter that controls the randomness of the model's output                                    | `0.7`                                                                                 |
 
 > 🧾 **File Ignoring**:
 > Ragmate automatically excludes files and folders specified in `.gitignore` and `.aiignore` located in the project root.
@@ -125,12 +115,10 @@ TEXT_FILE_EXTENSIONS=[".py",".html",".css"]
 
 #### Embedding models
 
-| `EMBEDDING_PROVIDER`               | Models                                                             |
-|------------------------|--------------------------------------------------------------------|
-| `openai`         | [OpenAI docs](https://platform.openai.com/docs/models)             |
-| `gpt4all`| [GPT4All docs](https://docs.gpt4all.io/old/gpt4all_python_embedding.html#supported-embedding-models) |
-
-_Note: `gpt4all` runs the embedding model locally and it does not require `LLM_EMBEDDING_MODEL`_
+| `EMBEDDING_PROVIDER`               | Models                                                               |
+|------------------------|----------------------------------------------------------------------|
+| `openai`         | [OpenAI docs](https://platform.openai.com/docs/models)               |
+| `huggingface`| [HuggingFace models](https://huggingface.co/models?other=embeddings) |
 
 ---
 
