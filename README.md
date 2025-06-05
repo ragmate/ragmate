@@ -1,10 +1,10 @@
-# Ragmate
+# 🧠 RAGmate - Local RAG for JetBrains AI Assistant
 
-**Local RAG server for code editors (JetBrains supported).**
+**RAGmate** is an open-source, lightweight server that extends **JetBrains AI Assistant** with actual knowledge of your project.  
+It indexes your codebase locally and injects relevant context into prompts — so you get better, context-aware answers without changing your IDE workflow.
 
-Scans your codebase, builds a local context index, and connects to any external LLM for context-aware code generation.
-
----
+⚡ Works with **OpenAI**, **Ollama**, **LM Studio**, and any LLM with an API.  
+🔒 No cloud, no lock-in — everything runs **locally**.
 
 ## Demo
 
@@ -12,14 +12,50 @@ Scans your codebase, builds a local context index, and connects to any external 
   <img src="https://raw.githubusercontent.com/ragmate/ragmate/main/assets/docs/product-demo.gif" width="100%" />
 </p>
 
-The demo shows how Ragmate extends JetBrains AI Assistant with a RAG context.
+> JetBrains AI Assistant can't answer: “What patterns does this project use for the file scan?”  
+> With RAGmate, it gives a detailed answer — based on real code context.
 
-The prompt that was used for that:
-```
-What patterns does this project use for the files scan?
-```
+---
 
-The comparison between the default JetBrains AI Assistant with the GPT 4.1 mini LLM model and Ragmate with GPT 4.1 mini and local RAG.
+## 🚀 Why RAGmate?
+
+JetBrains AI Assistant is helpful — but lacks real project awareness.  
+**RAGmate adds missing context**, without plugins or cloud syncing.
+
+- ✅ Built for JetBrains IDEs
+- 🧠 Brings RAG to your local machine
+- 🧩 Works with any LLM API (OpenAI, local models, etc)
+- 🧼 No framework complexity (no LangChain / LlamaIndex)
+- 📁 Local embeddings + semantic search over your codebase
+
+---
+
+## ⚙️ How it works
+
+1. **Index** your project (automatically detects files to scan)
+2. **Start** RAGmate server
+3. **Connect** your JetBrains IDE to the RAGmate HTTP bridge
+4. Ask AI Assistant anything — with real code context
+
+---
+
+## 🛠️ Supported:
+
+- ✅ JetBrains IDEs (via HTTP bridge)
+- ✅ Any LLM with a simple `POST /completion` interface
+- ✅ Local embeddings (OpenAI, HuggingFace, more coming)
+
+---
+
+## 🧪 Use cases
+
+Ask your AI Assistant:
+
+- “Where is `verify_token()` used?”
+- “Explain the login flow in this codebase”
+- “How does the error handler work across services?”
+
+RAGmate ensures answers are grounded in your real code.
 
 ---
 
@@ -30,6 +66,15 @@ The comparison between the default JetBrains AI Assistant with the GPT 4.1 mini 
 - 🔄 Real-time file change tracking and automatic reindexing.
 - 🔌 Use any external or local LLM and embedding model.
 - 🛡️ Fully local — your code never leaves your machine.
+
+---
+
+## 👤 Who is this for?
+
+- Developers already using JetBrains AI Assistant
+- Engineers working with large or legacy codebases
+- Teams needing privacy-focused, local AI tools
+- Anyone frustrated by AI that “doesn't know the code”
 
 ---
 
@@ -73,7 +118,7 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 | Variable               | Description                                |
 |------------------------|--------------------------------------------|
 | `LLM_MODEL`         | LLM model for generation (e.g., `o3-mini`) |
-| `LLM_PROVIDER`| Embedding model (e.g., `openai`)           |
+| `LLM_PROVIDER`| LLM model (e.g., `openai`, `mistralai`)               |
 | `LLM_API_KEY`       | Your LLM API key                           |
 
 #### Optional variables:
@@ -156,3 +201,9 @@ Licensed under the [Apache 2.0 License](LICENSE).
 ## 🤝 Contributing
 
 Issues and PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+---
+
+## ⭐️ Like the idea?
+
+Star the repo and share feedback — we’re building in the open.
