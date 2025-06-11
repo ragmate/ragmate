@@ -118,8 +118,10 @@ Create the `.ragmate.env` file at the project root and add it to `.gitignore`.
 | Variable               | Description                                |
 |------------------------|--------------------------------------------|
 | `LLM_MODEL`         | LLM model for generation (e.g., `o3-mini`) |
-| `LLM_PROVIDER`| LLM model (e.g., `openai`, `mistralai`)               |
+| `LLM_PROVIDER`| LLM provider (e.g., `openai`, `mistralai`) |
 | `LLM_API_KEY`       | Your LLM API key                           |
+
+_The full list of available providers and their models you can find below_
 
 #### Optional variables:
 
