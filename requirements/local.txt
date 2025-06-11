@@ -1,6 +1,6 @@
 -r ./base.txt
 
-mypy==1.15.0
+mypy==1.16.0
 black==25.1.0
 pre-commit==4.2.0
 seed-isort-config==2.2.0
@@ -10,4 +10,4 @@ isort==6.0.1
 bandit==1.8.3
 interrogate==1.7.0
 dodgy==0.2.1
-ruff==0.11.11
+ruff==0.11.13
