@@ -38,6 +38,7 @@ class Settings(BaseSettings):
         ".html",
         ".css",
     ]
+    CUSTOM_FIRST_MESSAGE: str | None = None
 
 
 @lru_cache()

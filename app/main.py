@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse, StreamingResponse
 
 from .config import Settings, get_settings
 from .llm import LLM
-from .models import ChatRequestModel
+from .models import ChatMessageModel, ChatRequestModel
 from .services import DirectoryMonitorService, VectorStoreService
 
 
@@ -46,7 +46,11 @@ async def tags(settings: Annotated[Settings, Depends(get_settings)]):
 async def chat(body: ChatRequestModel, request: Request, settings: Annotated[Settings, Depends(get_settings)]):
 
     async def event_generator() -> AsyncGenerator[bytes, Any]:
-        async for resp in request.app.llm.chat(messages=body.messages):
+        messages = body.messages
+        if settings.CUSTOM_FIRST_MESSAGE is not None:
+            messages[0] = ChatMessageModel(role="user", content=settings.CUSTOM_FIRST_MESSAGE)
+
+        async for resp in request.app.llm.chat(messages=messages):
             if isinstance(resp, dict):
                 if "llm" not in resp:
                     continue

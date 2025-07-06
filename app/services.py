@@ -193,7 +193,7 @@ class VectorStoreService:
         if self.vector_store is None:
             raise Exception("Vector store is not initialized.")
 
-        result = self.vector_store.get(where={"doc_id": {"$in": ids}})
+        result = self.vector_store.get(where={"doc_id": {"$in": ids}})  # type: ignore[dict-item]
         if result["ids"]:
             self.vector_store.delete(ids=result["ids"])
             logger.info(f"Deleted {len(result['ids'])} documents.")
