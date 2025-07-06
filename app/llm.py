@@ -1,9 +1,8 @@
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Awaitable
+from typing import TYPE_CHECKING, Any, AsyncGenerator
 
 from langchain.chat_models import init_chat_model
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from langchain_core.runnables import RunnableLambda
 from langgraph.graph import StateGraph
 from typing_extensions import TypedDict
 
@@ -11,8 +10,6 @@ from .config import get_settings
 from .models import ChatMessageModel
 
 if TYPE_CHECKING:
-    from langchain_core.runnables.base import Runnable
-
     from .services import VectorStoreService
 
 
@@ -79,7 +76,7 @@ class LLM:
                 raise ValueError(f"Unknown role: {msg.role}")
         return converted
 
-    async def _llm_node_func(self, state: State) -> dict[str, Any]:
+    async def _llm_node(self, state: State) -> dict[str, Any]:
         llm = init_chat_model(
             get_settings().LLM_MODEL,
             model_provider=get_settings().LLM_PROVIDER,
@@ -91,13 +88,9 @@ class LLM:
         return {"answer": await llm.ainvoke(converted_prompt)}
 
     async def chat(self, messages: list["ChatMessageModel"]) -> AsyncGenerator[dict[str, Any], None]:
-        prompt_node: "Runnable[State, Awaitable[dict[str, Any]]]" = RunnableLambda(self._build_prompt_node)
-
-        llm_node: "Runnable[State, Awaitable[dict[str, Any]]]" = RunnableLambda(self._llm_node_func)
-
         graph = StateGraph(state_schema=State)
-        graph.add_node("prompt_builder", prompt_node)
-        graph.add_node("llm", llm_node)
+        graph.add_node("prompt_builder", self._build_prompt_node)
+        graph.add_node("llm", self._llm_node)
 
         graph.set_entry_point("prompt_builder")
         graph.add_edge("prompt_builder", "llm")
