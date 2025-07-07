@@ -159,7 +159,7 @@ class VectorStoreService:
 
         if self.vector_store is None:
             raise Exception("Vector store is not initialized.")
-        return self.vector_store.as_retriever()
+        return self.vector_store.as_retriever(search_type="mmr", search_kwargs={"k": 5, "fetch_k": 20})
 
     def add_documents(self, files_list: list[str]) -> None:
         logger.info("Adding documents...")
@@ -171,7 +171,7 @@ class VectorStoreService:
             with open(f, "r", encoding="utf-8") as file:
                 page_content = file.read()
                 if not page_content:
-                    return None
+                    continue
 
                 doc_id = get_path_hash(filepath=f)
                 doc = Document(page_content=page_content, metadata={"source": f, "doc_id": doc_id})

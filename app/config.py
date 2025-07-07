@@ -39,6 +39,12 @@ class Settings(BaseSettings):
         ".css",
     ]
     CUSTOM_FIRST_MESSAGE: str | None = None
+    JETBRAINS_CHAT_FIRST_MESSAGE_STARTS_FROM: str = "You MUST reply in a polite and helpful manner"
+    SKIP_RAG_FOR_CHAT_THAT_CONTAINS: list[str] = [
+        "Answer only with yes or no.",
+        "Suggest a MOST SPECIFIC title for this chat",
+        "You are given a user's request to JetBrains intellij AI Assistant.",
+    ]
 
 
 @lru_cache()

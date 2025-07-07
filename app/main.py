@@ -48,7 +48,7 @@ async def chat(body: ChatRequestModel, request: Request, settings: Annotated[Set
     async def event_generator() -> AsyncGenerator[bytes, Any]:
         messages = body.messages
         if settings.CUSTOM_FIRST_MESSAGE is not None:
-            if "You MUST reply in a polite and helpful manner" in messages[0]:
+            if settings.JETBRAINS_CHAT_FIRST_MESSAGE_STARTS_FROM in messages[0].content:
                 messages[0] = ChatMessageModel(role="user", content=settings.CUSTOM_FIRST_MESSAGE)
 
         async for resp in request.app.llm.chat(messages=messages):

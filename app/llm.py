@@ -25,6 +25,7 @@ class State(TypedDict):
 
 class LLM:
     files: list[str] = []
+    settings = get_settings()
 
     def __init__(self, vector_store: "VectorStoreService") -> None:
         self.vector_store = vector_store
@@ -34,8 +35,7 @@ class LLM:
         return "\n\n".join(doc.page_content for doc in docs)
 
     async def _build_prompt(self, messages: list[ChatMessageModel], docs: list[Document]):
-        messages = list(messages)
-        framework = get_settings().FRAMEWORK
+        framework = self.settings.FRAMEWORK
         if framework is not None:
             messages.append(
                 ChatMessageModel(
@@ -51,16 +51,37 @@ class LLM:
         return messages
 
     async def _build_prompt_node(self, state: State) -> dict[str, Any]:
-        retriever = self.vector_store.get_retriever()
-        query = ""
-        for message in state["messages"]:
-            query += message.content + "\n\n"
+        if any(
+            item_a in item_b.content
+            for item_a in self.settings.SKIP_RAG_FOR_CHAT_THAT_CONTAINS
+            for item_b in state["messages"]
+        ):
+            return {"prompt": state["messages"]}
 
-        docs = await retriever.ainvoke(input=query)
+        retriever = self.vector_store.get_retriever()
+        retriever_input = await self.prepare_retriever_input(user_prompt=state["messages"][-1].content)
+        docs = await retriever.ainvoke(input=retriever_input)
         prompt = await self._build_prompt(messages=state["messages"], docs=docs)
         return {
             "prompt": prompt,
         }
+
+    async def prepare_retriever_input(self, user_prompt: str) -> str:
+        query_prompt = """
+You are an assistant that converts long user prompts into short, clear retrieval queries for information search (retrieval).
+
+Below is a user prompt:
+'''
+{user_prompt}
+'''
+
+Your task:
+Extract and return only the final retrieval query, formulated as clearly and concisely as possible, so that it can be used to search for relevant code or documents.
+
+Return only the query text, without any explanations or additional comments.
+            """
+        response = await self.run(query=query_prompt.format(user_prompt=user_prompt))
+        return str(response.content)
 
     @staticmethod
     async def to_langchain_messages(messages: list[ChatMessageModel]) -> list[BaseMessage]:
@@ -76,16 +97,20 @@ class LLM:
                 raise ValueError(f"Unknown role: {msg.role}")
         return converted
 
-    async def _llm_node(self, state: State) -> dict[str, Any]:
-        llm = init_chat_model(
-            get_settings().LLM_MODEL,
-            model_provider=get_settings().LLM_PROVIDER,
-            temperature=get_settings().LLM_TEMPERATURE,
-            base_url=get_settings().LLM_BASE_URL,
-            api_key=get_settings().LLM_API_KEY,
-        )
+    async def _llm_node(self, state: State) -> dict[str, BaseMessage]:
         converted_prompt = await self.to_langchain_messages(messages=state["prompt"])
-        return {"answer": await llm.ainvoke(converted_prompt)}
+        return {"answer": await self.run(query=converted_prompt)}
+
+    async def run(self, query: str | list[BaseMessage]) -> BaseMessage:
+        llm = init_chat_model(
+            self.settings.LLM_MODEL,
+            model_provider=self.settings.LLM_PROVIDER,
+            temperature=self.settings.LLM_TEMPERATURE,
+            base_url=self.settings.LLM_BASE_URL,
+            api_key=self.settings.LLM_API_KEY,
+        )
+        response = await llm.ainvoke(query)
+        return response
 
     async def chat(self, messages: list["ChatMessageModel"]) -> AsyncGenerator[dict[str, Any], None]:
         graph = StateGraph(state_schema=State)
