@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     CACHE_PATH: str = "cache"
     HUGGINGFACE_MODEL_PATH: str = f"{CACHE_PATH}/huggingface"
     CHROMA_PERSIST_PATH: str = f"{CACHE_PATH}/chroma"
+    PARENT_DOCSTORE_PATH: str = f"{CACHE_PATH}/docstore"
 
     LOCAL_MODEL: str = "ragmate"
     REINDEX_AFTER_N_CHANGES: int = 50

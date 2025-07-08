@@ -10,6 +10,9 @@ import pathspec
 import torch
 from chromadb import PersistentClient
 from chromadb.errors import NotFoundError
+from langchain.retrievers import ParentDocumentRetriever
+from langchain.storage import LocalFileStore
+from langchain.storage._lc_store import create_kv_docstore
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
@@ -111,31 +114,30 @@ class DirectoryInspectorService:
 class VectorStoreService:
     vector_store: Chroma | None = None
 
+    settings = get_settings()
     _directory_inspector_service = DirectoryInspectorService()
 
-    @staticmethod
-    def _get_embeddings() -> Embeddings:
-        settings = get_settings()
-        api_key = settings.EMBEDDING_API_KEY or settings.LLM_API_KEY
+    def _get_embeddings(self) -> Embeddings:
+        api_key = self.settings.EMBEDDING_API_KEY or self.settings.LLM_API_KEY
 
         embeddings: Embeddings
-        match settings.EMBEDDING_PROVIDER:
+        match self.settings.EMBEDDING_PROVIDER:
             case "openai":
-                embeddings = OpenAIEmbeddings(model=settings.LLM_EMBEDDING_MODEL, api_key=api_key)
+                embeddings = OpenAIEmbeddings(model=self.settings.LLM_EMBEDDING_MODEL, api_key=api_key)
             case "huggingface":
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 embeddings = HuggingFaceEmbeddings(
-                    model_name=settings.LLM_EMBEDDING_MODEL,
-                    cache_folder=settings.HUGGINGFACE_MODEL_PATH,
+                    model_name=self.settings.LLM_EMBEDDING_MODEL,
+                    cache_folder=self.settings.HUGGINGFACE_MODEL_PATH,
                     model_kwargs={"device": device},
                 )
             case _:
-                raise Exception(f"Unknown embedding provider: {settings.EMBEDDING_PROVIDER}")
+                raise Exception(f"Unknown embedding provider: {self.settings.EMBEDDING_PROVIDER}")
 
         return embeddings
 
     def init(self) -> bool:
-        persistent_client = PersistentClient(path=get_settings().CHROMA_PERSIST_PATH)
+        persistent_client = PersistentClient(path=self.settings.CHROMA_PERSIST_PATH)
         collection_name = "collection"
         is_created = False
 
@@ -178,12 +180,22 @@ class VectorStoreService:
 
                 try:
                     lexer = get_lexer_for_filename(f)
-                    splitter = RecursiveCharacterTextSplitter.from_language(language=lexer.name.lower())
+                    child_splitter = RecursiveCharacterTextSplitter.from_language(language=lexer.name.lower())
                 except ClassNotFound:
-                    splitter = RecursiveCharacterTextSplitter()
+                    child_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=200)
 
-                all_splits = splitter.split_documents([doc])
-                self.vector_store.add_documents(documents=all_splits)
+                fs = LocalFileStore(self.settings.PARENT_DOCSTORE_PATH)
+                store = create_kv_docstore(fs)
+                parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
+
+                retriever = ParentDocumentRetriever(
+                    vectorstore=self.vector_store,
+                    docstore=store,
+                    child_splitter=child_splitter,
+                    parent_splitter=parent_splitter,
+                    id_key="doc_id",
+                )
+                retriever.add_documents(documents=[doc])
 
         logger.info("Documents added.")
 
