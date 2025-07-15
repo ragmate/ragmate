@@ -50,7 +50,7 @@ class DirectoryInspectorService:
     @staticmethod
     def load_patterns(project_path: str) -> pathspec.PathSpec:
         patterns = []
-        ignore_files = [".gitignore", ".aiignore"]
+        ignore_files = [".gitignore", ".git/info/exclude", ".aiignore"]
 
         for ignore_file in ignore_files:
             root_path = os.path.join(project_path, ignore_file)
