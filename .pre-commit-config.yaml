@@ -7,13 +7,6 @@ fail_fast: true
 repos:
   - repo: local
     hooks:
-      - id: seed-isort-config
-        name: seed-isort-config
-        stages: [pre-commit]
-        language: system
-        pass_filenames: false
-        entry: seed-isort-config
-        types: [python]
       - id: removestar
         name: removestar
         stages: [pre-commit]
