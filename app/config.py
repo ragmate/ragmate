@@ -21,9 +21,10 @@ class Settings(BaseSettings):
     HUGGINGFACE_MODEL_PATH: str = f"{CACHE_PATH}/huggingface"
     CHROMA_PERSIST_PATH: str = f"{CACHE_PATH}/chroma"
     PARENT_DOCSTORE_PATH: str = f"{CACHE_PATH}/docstore"
+    NEW_HEAD_FILE_PATH: str = f"{CACHE_PATH}/new_head.txt"
 
     LOCAL_MODEL: str = "ragmate"
-    REINDEX_AFTER_N_CHANGES: int = 50
+    REINDEX_AFTER_N_CHANGES: int = 20
     PROJECT_PATH: str = "/project"
     FRAMEWORK: str | None = None
     TEXT_FILE_EXTENSIONS: list[str] = [
@@ -46,6 +47,7 @@ class Settings(BaseSettings):
         "Suggest a MOST SPECIFIC title for this chat",
         "You are given a user's request to JetBrains intellij AI Assistant.",
     ]
+    DEFAULT_COLLECTION_NAME: str = "collection"
 
 
 @lru_cache()

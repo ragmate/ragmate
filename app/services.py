@@ -25,6 +25,7 @@ from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 from .config import get_settings
+from .shared_state import CheckoutEventState
 
 if TYPE_CHECKING:
     from langchain_core.vectorstores import VectorStoreRetriever
@@ -136,9 +137,8 @@ class VectorStoreService:
 
         return embeddings
 
-    def init(self) -> bool:
+    def init(self, collection_name) -> bool:
         persistent_client = PersistentClient(path=self.settings.CHROMA_PERSIST_PATH)
-        collection_name = "collection"
         is_created = False
 
         try:
@@ -286,13 +286,14 @@ class DirectoryMonitorEventHandler(PatternMatchingEventHandler):
 class DirectoryMonitorService:
     _directory_inspector_service = DirectoryInspectorService()
 
-    def __init__(self, vector_store: VectorStoreService) -> None:
+    def __init__(self, vector_store: VectorStoreService, event_state: CheckoutEventState) -> None:
         self.vector_store = vector_store
+        self.event_state = event_state
 
     def watch_directory(self) -> None:
         project_path = get_settings().PROJECT_PATH
 
-        is_created = self.vector_store.init()
+        is_created = self.vector_store.init(collection_name=self.event_state.new_head)
 
         if is_created:
             logger.info("No indexed files found. Loading and indexing files...")
@@ -318,7 +319,40 @@ class DirectoryMonitorService:
 
         try:
             while True:
-                time.sleep(1)
+                new_head = self.event_state.wait_for_new_head(timeout=1)
+                if new_head:
+                    logger.info(f"Received new_head in watcher: {new_head}")
+                    is_created = self.vector_store.init(collection_name=new_head)
+
+                    if is_created:
+                        logger.info(f"Collection={new_head}. No indexed files found. Loading and indexing files...")
+                        files = self._directory_inspector_service.list_files(project_path=project_path)
+                        self.vector_store.add_documents(files_list=files)
+                    else:
+                        logger.info(f"Collection={new_head}. Indexed files found. Skipping...")
+
+                time.sleep(0.1)
         except KeyboardInterrupt:
             observer.stop()
         observer.join()
+
+
+class CheckoutStorageService:
+    settings = get_settings()
+
+    def save_new_head(self, new_head: str) -> None:
+        try:
+            os.makedirs(os.path.dirname(self.settings.NEW_HEAD_FILE_PATH), exist_ok=True)
+            with open(self.settings.NEW_HEAD_FILE_PATH, "w", encoding="utf-8") as f:
+                f.write(new_head)
+        except Exception as e:
+            logger.error(f"Failed to save new_head to file: {e}")
+
+    def load_head(self) -> str:
+        try:
+            if os.path.exists(self.settings.NEW_HEAD_FILE_PATH):
+                with open(self.settings.NEW_HEAD_FILE_PATH, "r", encoding="utf-8") as f:
+                    return f.read().strip()
+        except Exception as e:
+            logger.warning(f"Failed to load new_head from file: {e}")
+        return self.settings.DEFAULT_COLLECTION_NAME

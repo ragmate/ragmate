@@ -1,4 +1,6 @@
 import json
+import logging
+import sys
 import threading
 from contextlib import asynccontextmanager
 from typing import Annotated, Any, AsyncGenerator
@@ -8,15 +10,27 @@ from fastapi.responses import PlainTextResponse, StreamingResponse
 
 from .config import Settings, get_settings
 from .llm import LLM
-from .models import ChatMessageModel, ChatRequestModel
-from .services import DirectoryMonitorService, VectorStoreService
+from .models import ChatMessageModel, ChatRequestModel, CheckoutEventModel
+from .services import CheckoutStorageService, DirectoryMonitorService, VectorStoreService
+from .shared_state import CheckoutEventState
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter(fmt="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     vector_store_service = VectorStoreService()
-    directory_monitor_service = DirectoryMonitorService(vector_store=vector_store_service)
+    new_head = CheckoutStorageService().load_head()
+    event_state = CheckoutEventState()
+    event_state.set_new_head(new_head=new_head)
+    directory_monitor_service = DirectoryMonitorService(vector_store=vector_store_service, event_state=event_state)
 
+    app.state.event_state = event_state
     app.llm = LLM(vector_store=vector_store_service)  # type: ignore[attr-defined]
     threading.Thread(target=directory_monitor_service.watch_directory, daemon=True).start()
     yield
@@ -78,3 +92,13 @@ async def chat(body: ChatRequestModel, request: Request, settings: Annotated[Set
         yield (json.dumps(final) + "\n").encode()
 
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")
+
+
+@app.post("/api/checkout-event")
+async def checkout_event(body: CheckoutEventModel, request: Request):
+    event_state: CheckoutEventState = request.app.state.event_state
+    event_state.set_new_head(body.new_head)
+
+    CheckoutStorageService().save_new_head(new_head=body.new_head)
+
+    return {}
