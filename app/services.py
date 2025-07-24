@@ -170,32 +170,35 @@ class VectorStoreService:
             raise Exception("Vector store is not initialized.")
 
         for f in files_list:
-            with open(f, "r", encoding="utf-8") as file:
-                page_content = file.read()
-                if not page_content:
-                    continue
+            try:
+                with open(f, "r", encoding="utf-8") as file:
+                    page_content = file.read()
+                    if not page_content:
+                        continue
 
-                doc_id = get_path_hash(filepath=f)
-                doc = Document(page_content=page_content, metadata={"source": f, "doc_id": doc_id})
+                    doc_id = get_path_hash(filepath=f)
+                    doc = Document(page_content=page_content, metadata={"source": f, "doc_id": doc_id})
 
-                try:
-                    lexer = get_lexer_for_filename(f)
-                    child_splitter = RecursiveCharacterTextSplitter.from_language(language=lexer.name.lower())
-                except ClassNotFound:
-                    child_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=200)
+                    try:
+                        lexer = get_lexer_for_filename(f)
+                        child_splitter = RecursiveCharacterTextSplitter.from_language(language=lexer.name.lower())
+                    except ClassNotFound:
+                        child_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=200)
 
-                fs = LocalFileStore(self.settings.PARENT_DOCSTORE_PATH)
-                store = create_kv_docstore(fs)
-                parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
+                    fs = LocalFileStore(self.settings.PARENT_DOCSTORE_PATH)
+                    store = create_kv_docstore(fs)
+                    parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
 
-                retriever = ParentDocumentRetriever(
-                    vectorstore=self.vector_store,
-                    docstore=store,
-                    child_splitter=child_splitter,
-                    parent_splitter=parent_splitter,
-                    id_key="doc_id",
-                )
-                retriever.add_documents(documents=[doc])
+                    retriever = ParentDocumentRetriever(
+                        vectorstore=self.vector_store,
+                        docstore=store,
+                        child_splitter=child_splitter,
+                        parent_splitter=parent_splitter,
+                        id_key="doc_id",
+                    )
+                    retriever.add_documents(documents=[doc])
+            except FileNotFoundError:
+                logger.warning(f"File not found: {f}")
 
         logger.info("Documents added.")
 
