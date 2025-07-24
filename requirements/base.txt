@@ -1,11 +1,11 @@
 pip==25.1.1
-langchain[openai,anthropic,google-genai,mistralai,xai,deepseek]==0.3.26
+langchain[openai,anthropic,google-genai,mistralai,xai,deepseek]==0.3.27
 langchain-community==0.3.27
-langchain-core==0.3.69
-langchain-text-splitters==0.3.8
-langchain-chroma==0.2.4
-langchain-huggingface==0.3.0
-langgraph==0.5.3
+langchain-core==0.3.72
+langchain-text-splitters==0.3.9
+langchain-chroma==0.2.5
+langchain-huggingface==0.3.1
+langgraph==0.5.4
 pathspec==0.12.1
 fastapi==0.116.1
 pydantic==2.11.7
@@ -13,7 +13,7 @@ pydantic-settings==2.10.1
 uvicorn==0.35.0
 gunicorn==23.0.0
 watchdog==6.0.0
-numpy==2.3.1
+numpy==2.3.2
 sentence-transformers==5.0.0
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.7.1
