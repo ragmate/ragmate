@@ -138,6 +138,7 @@ class VectorStoreService:
         return embeddings
 
     def init(self, collection_name) -> bool:
+        logger.info(f"Initializing vector store for collection={collection_name}...")
         persistent_client = PersistentClient(path=self.settings.CHROMA_PERSIST_PATH)
         is_created = False
 

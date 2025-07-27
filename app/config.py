@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str | None = None
     LLM_TEMPERATURE: float = 0.7
 
-    LLM_EMBEDDING_MODEL: str = "microsoft/codebert-base"
+    LLM_EMBEDDING_MODEL: str = "nomic-ai/nomic-embed-code"
     EMBEDDING_API_KEY: str | None = None
     EMBEDDING_PROVIDER: Literal["openai", "huggingface"] = "huggingface"
 
