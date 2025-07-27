@@ -153,14 +153,15 @@ TEXT_FILE_EXTENSIONS=[".py",".html",".css"]
 
 #### LLM providers and their models
 
-| `LLM_PROVIDER`               | Models                                                               |
-|------------------------|----------------------------------------------------------------------|
-| `openai`         | [OpenAI docs](https://platform.openai.com/docs/models)               |
-| `anthropic`| [Anthropic docs](https://docs.anthropic.com/en/docs/models-overview) |
-| `google-genai`       | [Gemini API docs](https://ai.google.dev/gemini-api/docs/models)      |
-| `mistralai`       | [Mistral AI docs](https://docs.mistral.ai/getting-started/models/)   |
-| `xai`       | [xAI docs](https://docs.x.ai/docs/models#models-and-pricing)         |
-| `deepseek`       | [DeepSeek docs](https://api-docs.deepseek.com/quick_start/pricing)   |
+| `LLM_PROVIDER`               | Models                                                                |
+|------------------------|-----------------------------------------------------------------------|
+| `openai`         | [OpenAI docs](https://platform.openai.com/docs/models)                |
+| `anthropic`| [Anthropic docs](https://docs.anthropic.com/en/docs/models-overview)  |
+| `google-genai`       | [Gemini API docs](https://ai.google.dev/gemini-api/docs/models)       |
+| `mistralai`       | [Mistral AI docs](https://docs.mistral.ai/getting-started/models/)    |
+| `xai`       | [xAI docs](https://docs.x.ai/docs/models#models-and-pricing)          |
+| `deepseek`       | [DeepSeek docs](https://api-docs.deepseek.com/quick_start/pricing)    |
+| `huggingface`       | [HuggingFace docs](https://huggingface.co/models) |
 
 #### Embedding models
 
